@@ -6,6 +6,7 @@ import TaskList from "../pages/TaskList";
 vi.mock("axios");
 const mockedAxiosGet = axios.get as unknown as ReturnType<typeof vi.fn>;
 const mockedAxiosPost = axios.post as unknown as ReturnType<typeof vi.fn>;
+const mockedAxiosDelete = axios.delete as unknown as ReturnType<typeof vi.fn>;
 
 // 1. Fetches Tasks
 it("fetches and displays tasks", async () => {
@@ -57,5 +58,33 @@ it("adds a new task", async () => {
 
   await waitFor(() => {
     expect(screen.getByText(newTask.title)).toBeInTheDocument();
+  });
+});
+
+// 3. Deletes a task
+it("deletes a task", async () => {
+  const mockTask = {
+    id: "1",
+    title: "Task to Delete",
+    description: "",
+    created: new Date().toISOString(),
+    complete: false,
+  };
+
+  mockedAxiosGet.mockResolvedValueOnce({ data: [mockTask] });
+  mockedAxiosDelete.mockResolvedValueOnce({});
+
+  render(<TaskList />);
+
+  await screen.findByText(mockTask.title);
+
+  fireEvent.click(screen.getByTestId(`delete-button-${mockTask.id}`));
+
+  fireEvent.click(
+    screen.getByTestId("confirm-delete-button") || screen.getByText(/Confirm/i)
+  );
+
+  await waitFor(() => {
+    expect(screen.queryByText(mockTask.title)).not.toBeInTheDocument();
   });
 });
