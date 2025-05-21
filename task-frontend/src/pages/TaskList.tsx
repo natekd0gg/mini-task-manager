@@ -1,20 +1,24 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AddTaskModal from "../components/AddTaskModal";
+import DeleteTaskModal from "../components/DeleteTaskModal";
 import { v4 as uuidv4 } from "uuid";
+import { Trash2 } from "lucide-react";
 
-type Task = {
+interface Task {
   id: string;
   created: Date;
   title: string;
   description: string;
   complete: boolean;
   due?: Date;
-};
+}
 
 const TaskList = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showAddTaskModal, setAddTaskShowModal] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -66,6 +70,24 @@ const TaskList = () => {
     }
   };
 
+  const handleDeleteClick = (task: Task) => {
+    setTaskToDelete(task);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteTask = async () => {
+    if (!taskToDelete) return;
+
+    try {
+      await axios.delete(`http://localhost:3001/tasks/${taskToDelete.id}`);
+      setTasks(tasks.filter((task) => task.id !== taskToDelete.id));
+      setTaskToDelete(null);
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    }
+  };
+
   return (
     <>
       <div className="p-4 max-w-3xl mx-auto">
@@ -98,6 +120,14 @@ const TaskList = () => {
                 >
                   {task.complete ? "Completed" : "Incomplete"}
                 </p>
+                <button
+                  onClick={() => handleDeleteClick(task)}
+                  className="text-black hover:text-red-500 cursor-pointer transition-colors flex-shrink-0"
+                  title="Delete Task"
+                  data-testid={`delete-button-${task.id}`}
+                >
+                  <Trash2 />
+                </button>
               </li>
             ))}
           </ul>
@@ -105,7 +135,7 @@ const TaskList = () => {
         <div className="flex justify-center mt-8">
           <button
             onClick={() => setAddTaskShowModal(true)}
-            className="bg-pink-500 hover:bg-pink-600 text-gray-900 font-bold py-3 px-8 rounded-full transition-colors cursor-pointer"
+            className="[background-color:#ff50be] hover:bg-pink-600 text-gray-900 font-bold py-3 px-8 rounded-full transition-colors cursor-pointer"
           >
             Create New Task
           </button>
@@ -115,6 +145,11 @@ const TaskList = () => {
         isOpen={showAddTaskModal}
         onClose={() => setAddTaskShowModal(false)}
         onSubmit={handleAddTask}
+      />
+      <DeleteTaskModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteTask}
       />
     </>
   );
