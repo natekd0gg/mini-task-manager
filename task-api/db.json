@@ -1,0 +1,19 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "created": "01/05/2025",
+      "title": "Initial Task",
+      "description": "I need to build this app",
+      "complete": false
+    },
+    {
+      "id": 2,
+      "created": "01/05/2025",
+      "title": "API Task",
+      "description": "I need to fix the api",
+      "complete": false,
+      "due": "20/05/2025"
+    }
+  ]
+}
