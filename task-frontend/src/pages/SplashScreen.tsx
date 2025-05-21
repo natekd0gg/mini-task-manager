@@ -11,7 +11,10 @@ const SplashScreen = () => {
         STAY ON TOP OF TASKS, <br />
         STRESS-FREE
       </h1>
-      <button className="[background-color:#ff50be] hover:[background-color:#e647aa] font-bold py-3 px-12 rounded-full transition-colors cursor-pointer w-96">
+      <button
+        onClick={() => navigate("/tasks")}
+        className="[background-color:#ff50be] hover:[background-color:#e647aa] font-bold py-3 px-12 rounded-full transition-colors cursor-pointer w-96"
+      >
         Get started
       </button>
     </div>
