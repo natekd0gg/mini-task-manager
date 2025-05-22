@@ -4,7 +4,8 @@ import AddTaskModal from "../components/AddTaskModal";
 import DeleteTaskModal from "../components/DeleteTaskModal";
 import { v4 as uuidv4 } from "uuid";
 import { Check, Trash2 } from "lucide-react";
-import Filter from "../components/Filter";
+import Filter from "../components/DateRangeFilter";
+import Pagination from "../components/Pagination";
 
 interface Task {
   id: string;
@@ -25,6 +26,8 @@ const TaskList = () => {
   );
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const tasksPerPage = 20;
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -104,7 +107,7 @@ const TaskList = () => {
       await axios.put(`http://localhost:3001/tasks/${task.id}`, updatedTask);
 
       setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === task.id ? updatedTask : task))
+        prevTasks.map((item) => (item.id === task.id ? updatedTask : item))
       );
     } catch (error) {
       console.error("Failed to toggle task completion:", error);
@@ -128,6 +131,12 @@ const TaskList = () => {
       console.error("Failed to delete task:", error);
     }
   };
+
+  const startIndex = (currentPage - 1) * tasksPerPage;
+  const paginatedTasks = filteredTasks.slice(
+    startIndex,
+    startIndex + tasksPerPage
+  );
 
   return (
     <div className="max-w-3xl mx-auto text-white px-4">
@@ -158,7 +167,7 @@ const TaskList = () => {
         ))}
       </div>
       <div className="bg-[#1a1a1a] p-4 rounded-b-2xl">
-        {filteredTasks.length === 0 ? (
+        {paginatedTasks.length === 0 ? (
           <p className="text-center text-gray-400">
             {activeTab === "completed"
               ? "No completed tasks yet."
@@ -166,7 +175,7 @@ const TaskList = () => {
           </p>
         ) : (
           <ul className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-            {filteredTasks.map((task) => (
+            {paginatedTasks.map((task) => (
               <li key={task.id} className="bg-black p-4 rounded-xl shadow-md">
                 <div className="flex justify-between items-start">
                   <span
@@ -251,6 +260,16 @@ const TaskList = () => {
           onClose={() => setShowDeleteModal(false)}
           onConfirm={handleDeleteTask}
         />
+        {filteredTasks.length > tasksPerPage && (
+          <div className="mt-6">
+            <Pagination
+              totalItems={filteredTasks.length}
+              itemsPerPage={tasksPerPage}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

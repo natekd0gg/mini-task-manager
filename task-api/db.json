@@ -9,11 +9,11 @@
     },
     {
       "id": 2,
-      "created": "01/05/2025",
+      "created": "2025-01-04T13:00:00.000Z",
       "title": "API Task",
       "description": "I need to fix the api",
       "complete": false,
-      "due": "20/05/2025"
+      "due": null
     }
   ]
 }

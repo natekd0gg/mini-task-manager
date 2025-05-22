@@ -9,8 +9,7 @@ const mockedAxiosPost = axios.post as unknown as ReturnType<typeof vi.fn>;
 const mockedAxiosPut = axios.put as ReturnType<typeof vi.fn>;
 const mockedAxiosDelete = axios.delete as unknown as ReturnType<typeof vi.fn>;
 
-// 1. View a list of all tasks
-it("fetches and displays tasks", async () => {
+it("Views a list of all tasks", async () => {
   const mockTasks = [
     {
       id: "1",
@@ -29,8 +28,7 @@ it("fetches and displays tasks", async () => {
   expect(screen.getByText("This is a test")).toBeInTheDocument();
 });
 
-// 2. Add a new task
-it("adds a new task", async () => {
+it("Adds a new task", async () => {
   mockedAxiosGet.mockResolvedValueOnce({ data: [] });
 
   const newTask = {
@@ -62,8 +60,7 @@ it("adds a new task", async () => {
   });
 });
 
-// 3. Mark a task as complete
-it("marks a task complete", async () => {
+it("Marks a task as complete", async () => {
   const mockTask = {
     id: "1",
     title: "Complete Me",
@@ -85,8 +82,7 @@ it("marks a task complete", async () => {
   );
 });
 
-// 4. Delete a task
-it("delete a task", async () => {
+it("Delete a task", async () => {
   const mockTask = {
     id: "1",
     title: "Task to Delete",
@@ -113,8 +109,7 @@ it("delete a task", async () => {
   });
 });
 
-// 5. Filters the list by created date – should be a range
-it("filters tasks by fromDate", async () => {
+it("Filters the list by created date", async () => {
   const oldDate = "2020-01-01T00:00:00.000Z";
   const recentDate = new Date().toISOString();
 
@@ -154,4 +149,28 @@ it("filters tasks by fromDate", async () => {
     expect(screen.queryByText("Old Task")).not.toBeInTheDocument();
     expect(screen.getByText("Recent Task")).toBeInTheDocument();
   });
+});
+
+it("Paginates a list of tasks if it is greater than 20", async () => {
+  const tasks = [];
+
+  for (let i = 0; i < 21; i++) {
+    tasks.push({
+      id: String(i),
+      title: `Task ${i + 1}`,
+      description: "",
+      created: new Date().toISOString(),
+      complete: false,
+    });
+  }
+
+  mockedAxiosGet.mockResolvedValueOnce({ data: tasks });
+
+  render(<TaskList />);
+
+  expect(await screen.findByText("Task 1")).toBeInTheDocument();
+  expect(screen.queryByText("Task 21")).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByText("2"));
+  expect(await screen.findByText("Task 21")).toBeInTheDocument();
 });
